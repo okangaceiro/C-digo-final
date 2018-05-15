@@ -109,7 +109,7 @@ void gamescreen(){
 		if(vida) control();
 		mapa(0);
 		if (vida || inicio) masked_blit(itens, buffer, p.wx, p.wy, p.x*28-8, p.y*21-7, p.w, p.h);
-		for (i = 0; i < vidas; i++) masked_blit(itens, buffer, 84, 0, 820 + i*45, 600, 42, 44);
+		for (i = 0; i < vidas; i++) masked_blit(itens, buffer, 84+(i*76), 0, 820 + i*45, 600, 42, 44);
 		fantasma();
 		draw_sprite(screen, buffer, 0, 0);
 		rest(100);
@@ -348,7 +348,7 @@ void fantasma(){
     masked_blit(itens, buffer, f[i].wx, f[i].wy, f[i].x*28 - 8, f[i].y * 21 - 7, f[i].w, f[i].h);
 
     //colisão
-    if(vidas && p.x == f[i].x && p.y == f[i].y)
+    if(vidas && (p.x == f[i].x && p.y == f[i].y || antX == f[i].x && antY == f[i].y))
     {
         morre = 1;
     }
@@ -421,7 +421,7 @@ void mapa(int mod){
                             for(j=0; j<28; j++)
                             {
                                 if (mod) map[i][j] = mp [i][j];
-                                if (map [i][j] == 2) masked_blit(itens, buffer, 60, 10, j*28 + 10, i*21 + 16, 6, 6); //pontinhos
+                                if (map [i][j] == 2) masked_blit(itens, buffer, 145, 3, j*28 + 10, i*21 + 16, 6, 6); //pontinhos
                             }
 
                         }
