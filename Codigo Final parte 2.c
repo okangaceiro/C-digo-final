@@ -11,12 +11,13 @@ void restart();
 void mapa(int);
 void control();
 void fecha_programa();
-enum{ MAINMENU, GAMESCREEN, TITLEHELP, TITLECREDITS, LOADING};
+enum{ MAINMENU, GAMESCREEN, TITLEHELP, TITLECREDITS, LOADING, ENDGAME};
 void mainmenu();
 void titlecredits();
 void titlehelp();
 void gamescreen();
 void titleload();
+void titlend();
 
 //Variáveis Globais
 int sai    = 0;
@@ -36,7 +37,7 @@ volatile int exit_program;
 int screen_state;
 
 SAMPLE *ponto, *morto, *comecou, *fase;
-BITMAP *buffer, *itens, *fundo, *menu, *cursor, *newgame, *help, *credits, *menuhelp, *menucredits;
+BITMAP *buffer, *itens, *fundo, *menu, *cursor, *newgame, *help, *credits, *menuhelp, *menucredits, *gameover, *gameover1, *win, *win1;
 
 int main() {
 
@@ -69,8 +70,10 @@ int main() {
             titlehelp();
         else if(screen_state == TITLECREDITS)
             titlecredits();
-        /*else if(screen_state == ENDGAME)
-            titlend();*/
+        else if(screen_state == LOADING)
+            titleload();
+        else if(screen_state == ENDGAME)
+            titlend();
     }
     //Finalizacao
 	return 0;
@@ -82,10 +85,11 @@ END_OF_FUNCTION(fecha_programa)
 
 void gamescreen(){
 
+    int exit_screen = FALSE;
     //Variáveis Locais
 	buffer = create_bitmap(width, height);
 	fundo = load_bitmap("img/mapaQuaseCerto.bmp", NULL);
-	itens = load_bitmap("img/Servao.bmp", NULL);
+	itens = load_bitmap("img/Servao1.bmp", NULL);
 	//f28 = load_font("f283.ttf", NULL, NULL);
 	ponto = load_sample("som/comendo.wav");
 	comecou = load_sample("som/comecou.mid");
@@ -104,16 +108,16 @@ void gamescreen(){
     }
 
     mapa(1);
-	while (!(sai || key[KEY_ESC]))
+	while (!exit_program && !exit_screen)
 	{
-		antX = p.x;
-	    	antY = p.y;
-	    	draw_sprite(buffer, fundo, 5, 5);
+	    antX = p.x;
+	    antY = p.y;
+	    draw_sprite(buffer, fundo, 5, 5);
 		textprintf_ex(buffer, font, 980, 250, 0xffffff, -1,"%i", comendo);
 		if(vida) control();
 		mapa(0);
 		if (vida || inicio) masked_blit(itens, buffer, p.wx, p.wy, p.x*28-8, p.y*21-7, p.w, p.h);
-		for (i = 0; i < vidas; i++) masked_blit(itens, buffer, 84+(i*76), 0, 820 + i*45, 600, 42, 44);
+		for (i = 0; i < vidas; i++) masked_blit(itens, buffer, 160, 0, 820 + i*45, 600, 42, 44);
 		fantasma();
 		draw_sprite(screen, buffer, 0, 0);
 		rest(100);
@@ -122,6 +126,15 @@ void gamescreen(){
 		//sons
 		if (som == 2) {stop_sample(ponto); play_sample(ponto, 255, 128, 1000, 0);}
 		som = 0;
+
+		if(vidas<=0){
+            exit_screen = TRUE;
+            screen_state = ENDGAME;
+		}
+		else if(vidas>0 && comendo>=250){
+            exit_screen = TRUE;
+            screen_state = ENDGAME;
+		}
 	}
 
 	//Finalização
@@ -159,7 +172,7 @@ void mainmenu(){
                     if(mouse_b == 1)
                         {
                             exit_screen = TRUE;
-                            screen_state = GAMESCREEN;
+                            screen_state = LOADING;
                         }
                 }
                 else if(mouse_x > 320 && mouse_x < 703 && mouse_y > 400 && mouse_y < 472)
@@ -266,6 +279,65 @@ void titlecredits(){
 
 }
 
+void titlend(){
+
+    int exit_screen = FALSE;
+
+    //BITMAPS
+    buffer = create_bitmap(width, height);
+    gameover = load_bitmap("img/gameover0.bmp", NULL);
+    gameover1 = load_bitmap("img/gameover1.bmp", NULL);
+    win = load_bitmap("img/winner.bmp", NULL);
+    win1 = load_bitmap("img/winner1.bmp", NULL);
+    cursor = load_bitmap("img/cursor.bmp", NULL);
+     while(!exit_program && !exit_screen){
+
+            if(vidas>0 && comendo>=250){
+                    draw_sprite(buffer, win, 0, 0);
+
+                    if(mouse_x > 335 && mouse_x < 717 && mouse_y > 286 && mouse_y < 357){
+                    draw_sprite(buffer, win1, 0, 0);
+
+                    if(mouse_b == 1)
+                        {
+                            vidas = 3;
+                            comendo = 0;
+                            exit_screen = TRUE;
+                            screen_state = MAINMENU;
+                        }
+                    }
+            }
+            else if(vidas<=0){
+
+                 draw_sprite(buffer, gameover, 0, 0);
+                 //rectfill(buffer, 335, 286, 717, 357, makecol(255,255,0));
+                 if(mouse_x > 335 && mouse_x < 717 && mouse_y > 286 && mouse_y < 357)
+                 {
+                    draw_sprite(buffer, gameover1, 0, 0);
+                    if(mouse_b == 1)
+                        {
+                            vidas = 3;
+                            comendo = 0;
+                            exit_screen = TRUE;
+                            screen_state = MAINMENU;
+                        }
+                 }
+              }
+              draw_sprite(buffer, cursor, mouse_x-6, mouse_y);
+              draw_sprite(screen, buffer, 0, 0);
+              clear(buffer);
+
+   }
+
+    destroy_bitmap(gameover);
+    destroy_bitmap(gameover1);
+    destroy_bitmap(win);
+    destroy_bitmap(win1);
+    destroy_bitmap(cursor);
+    destroy_bitmap(buffer);
+
+}
+
 void restart(){
     if (morre || !vida) stop_sample(fase);
     if (inicio)
@@ -306,6 +378,8 @@ void restart(){
 void fantasma(){
     int i;
     for(i = 0; i<4 ; i++){
+
+            //Boitatá = anda aleatoriamente pelo mapa, funcao já implementada
             //direita
             if (f[i].dir == 2 && map[f[i].y][f[i].x+1] == 1)
             {
@@ -343,7 +417,7 @@ void fantasma(){
                 else (map[f[i].y][f[i].x-1] != 1) ? (f[i].dir = 0) : (f[i].dir = 2);
             }
 
-                if(f[i].dir == 0 && map[f[i].y][f[i].x-1] != 1) f[i].x--; // esq
+            if(f[i].dir == 0 && map[f[i].y][f[i].x-1] != 1) f[i].x--; // esq
             else if(f[i].dir == 1 && map[f[i].y-1][f[i].x] != 1) f[i].y--; //cima
             else if(f[i].dir == 2 && map[f[i].y][f[i].x+1] != 1) f[i].x++; // dir
             else if(f[i].dir == 3 && map[f[i].y+1][f[i].x] != 1) f[i].y++; // baixo
@@ -387,6 +461,7 @@ void control(){
 void mapa(int mod){
     int i, j;
     // numero 31 é vertical, e 28 horizontal. isso é para por os trocinhos dele comer
+    // 1 == barreira, 2 == sem barreira e pontos , 4 == sem barreira e sem pontos
     char mp[31][28] =  {{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
                         {1,2,2,2,2,2,2,2,2,2,2,2,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,1},
                         {1,2,1,1,1,1,2,1,1,1,1,1,2,1,1,2,1,1,1,1,1,2,1,1,1,1,2,1},
@@ -418,7 +493,6 @@ void mapa(int mod){
                         {1,2,1,1,1,1,1,1,1,1,1,1,2,1,1,2,1,1,1,1,1,1,1,1,1,1,2,1},
                         {1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1},
                         {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}};
-
 
                         for (i=0; i<31;i++)
                         {
