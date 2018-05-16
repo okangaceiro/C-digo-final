@@ -26,6 +26,8 @@ int vidas = 3;
 int morre = 0;
 int inicio = 0;
 int fase1 = 0;
+int antX = 0;
+int antY = 0;
 int width  = 1048;
 int height = 670;
 int map [31][28];
