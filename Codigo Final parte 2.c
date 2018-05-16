@@ -106,7 +106,9 @@ void gamescreen(){
     mapa(1);
 	while (!(sai || key[KEY_ESC]))
 	{
-	    draw_sprite(buffer, fundo, 5, 5);
+		antX = p.x;
+	    	antY = p.y;
+	    	draw_sprite(buffer, fundo, 5, 5);
 		textprintf_ex(buffer, font, 980, 250, 0xffffff, -1,"%i", comendo);
 		if(vida) control();
 		mapa(0);
