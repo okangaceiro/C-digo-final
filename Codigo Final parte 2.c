@@ -396,7 +396,7 @@ void restart(){
     if (inicio)
     {
         vida = vidas;
-        rest(5000);
+        rest(3000);
         inicio = 0;
         fase1 = 0;
     }
