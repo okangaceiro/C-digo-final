@@ -396,7 +396,7 @@ void restart(){
     if (inicio)
     {
         vida = vidas;
-        rest(3000);
+        rest(5000);
         inicio = 0;
         fase1 = 0;
     }
@@ -434,42 +434,73 @@ void fantasma(){
     int i;
     for(i = 0; i<4 ; i++){
 
-            //Boitatá = anda aleatoriamente pelo mapa, funcao já implementada
-            //direita
-            if (f[i].dir == 2 && map[f[i].y][f[i].x+1] == 1)
+            if(f[i].x > 10 && f[i].x < 17 && f[i].y == 14) f[i].dir = rand() % 4;
+            else if((f[i].y == 12 || f[i].y == 13) && (f[i].x == 13 || f[i].x == 14)) f[i].dir = 1;
+
+             //FANTASMAS ATRAVESSANDO A TELA (NO PONTO)
+            else if(f[i].x < 1) f[i].x = 27;
+            else if(f[i].x > 26 && f[i].dir == 2) f[i].x = 1;
+
+            //Sr. de Engenho = perseguidor
+
+            else if(i==3 && f[3].x < p.x && f[3].dir != 0 && map[f[3].y][f[3].x+1] != 1) f[3].dir = 2;
+            else if(i==3 && f[3].x > p.x && f[3].dir != 2 && map[f[3].y][f[3].x-1] != 1) f[3].dir = 0;
+            else if(i==3 && f[3].y < p.y && f[3].dir != 1 && map[f[3].y+1][f[3].x] != 1) f[3].dir = 3;
+            else if(i==3 && f[3].y > p.y && f[3].dir != 3 && map[f[3].y-1][f[3].x] != 1) f[3].dir = 1;
+
+            //Curupira = fica um pouco longe do Kangaceiro
+            else if(i==2 && f[2].x < p.x+16 && f[2].dir != 0 && map[f[2].y][f[2].x+1] != 1) f[2].dir = 2;
+            else if(i==2 && f[2].x > p.x+16 && f[2].dir != 2 && map[f[2].y][f[2].x-1] != 1) f[2].dir = 0;
+            else if(i==2 && f[2].y < p.y+16 && f[2].dir != 1 && map[f[2].y+1][f[2].x] != 1) f[2].dir = 3;
+            else if(i==2 && f[2].y < p.y+16 && f[2].dir != 3 && map[f[2].y-1][f[2].x] != 1) f[2].dir = 1;
+
+            //Lobisomem = tenta imitar a posição do Kangaceiro
+            else if(i==1 && f[1].x < p.x-8 && f[1].dir != 0 && map[f[1].y][f[1].x+1] != 1) f[1].dir = 2;
+            else if(i==1 && f[1].x > p.x-8 && f[1].dir != 2 && map[f[1].y][f[1].x-1] != 1) f[1].dir = 0;
+            else if(i==1 && f[1].y < p.y-8 && f[1].dir != 1 && map[f[1].y+1][f[1].x] != 1) f[1].dir = 3;
+            else if(i==1 && f[1].y > p.y-8 && f[1].dir != 3 && map[f[1].y-1][f[1].x] != 1) f[1].dir = 1;
+            else
             {
-                if(map[f[i].y-1][f[i].x] != 1 && map[f[i].y+1][f[i].x] != 1)
+
+
+                //Boitatá = anda aleatoriamente pelo mapa, funcao já implementada
+
+                //direita
+                if (f[i].dir == 2 && map[f[i].y][f[i].x+1] == 1)
                 {
-                    (rand()%2) ? (f[i].dir = 1) : (f[i].dir = 3);
+                    if(map[f[i].y-1][f[i].x] != 1 && map[f[i].y+1][f[i].x] != 1)
+                    {
+                        (rand()%2) ? (f[i].dir = 1) : (f[i].dir = 3);
+                    }
+                    else (map[f[i].y-1][f[i].x] != 1) ? (f[i].dir = 1) : (f[i].dir = 3);
                 }
-                else (map[f[i].y-1][f[i].x] != 1) ? (f[i].dir = 1) : (f[i].dir = 3);
-            }
-            //esquerda
-            if (f[i].dir == 0 && map[f[i].y][f[i].x-1] == 1)
-            {
-                if(map[f[i].y-1][f[i].x] != 1 && map[f[i].y+1][f[i].x] != 1)
+                //esquerda
+                if (f[i].dir == 0 && map[f[i].y][f[i].x-1] == 1)
                 {
-                    (rand()%2) ? (f[i].dir = 1) : (f[i].dir = 3);
+                    if(map[f[i].y-1][f[i].x] != 1 && map[f[i].y+1][f[i].x] != 1)
+                    {
+                        (rand()%2) ? (f[i].dir = 1) : (f[i].dir = 3);
+                    }
+                    else (map[f[i].y-1][f[i].x] != 1) ? (f[i].dir = 1) : (f[i].dir = 3);
                 }
-                else (map[f[i].y-1][f[i].x] != 1) ? (f[i].dir = 1) : (f[i].dir = 3);
-            }
-            //baixo
-            if (f[i].dir == 3 && map[f[i].y+1][f[i].x] == 1)
-            {
-                if(map[f[i].y][f[i].x-1] != 1 && map[f[i].y][f[i].x+1] != 1)
+                //baixo
+                if (f[i].dir == 3 && map[f[i].y+1][f[i].x] == 1)
                 {
-                    (rand()%2) ? (f[i].dir = 0) : (f[i].dir = 2);
+                    if(map[f[i].y][f[i].x-1] != 1 && map[f[i].y][f[i].x+1] != 1)
+                    {
+                        (rand()%2) ? (f[i].dir = 0) : (f[i].dir = 2);
+                    }
+                    else (map[f[i].y][f[i].x-1] != 1) ? (f[i].dir = 0) : (f[i].dir = 2);
                 }
-                else (map[f[i].y][f[i].x-1] != 1) ? (f[i].dir = 0) : (f[i].dir = 2);
-            }
-            //cima
-            if (f[i].dir == 1 && map[f[i].y-1][f[i].x] == 1)
-            {
-                if(map[f[i].y][f[i].x-1] != 1 && map[f[i].y][f[i].x+1] != 1)
+                //cima
+                if (f[i].dir == 1 && map[f[i].y-1][f[i].x] == 1)
                 {
-                    (rand()%2) ? (f[i].dir = 0) : (f[i].dir = 2);
+                    if(map[f[i].y][f[i].x-1] != 1 && map[f[i].y][f[i].x+1] != 1)
+                    {
+                        (rand()%2) ? (f[i].dir = 0) : (f[i].dir = 2);
+                    }
+                    else (map[f[i].y][f[i].x-1] != 1) ? (f[i].dir = 0) : (f[i].dir = 2);
                 }
-                else (map[f[i].y][f[i].x-1] != 1) ? (f[i].dir = 0) : (f[i].dir = 2);
             }
 
             if(f[i].dir == 0 && map[f[i].y][f[i].x-1] != 1) f[i].x--; // esq
@@ -529,9 +560,9 @@ void mapa(int mod){
                         {1,1,1,1,1,1,2,1,1,1,1,1,2,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1},
                         {1,1,1,1,1,1,2,1,1,1,1,1,2,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1},
                         {1,1,1,1,1,1,2,1,1,2,2,2,2,2,2,2,2,2,2,1,1,2,1,1,1,1,1,1},
-                        {1,1,1,1,1,1,2,1,1,2,1,1,4,4,4,4,1,1,2,1,1,2,1,1,1,1,1,1},
-                        {1,1,1,1,1,1,2,1,1,2,1,4,4,4,4,4,4,1,2,1,1,2,1,1,1,1,1,1},
-                        {0,0,0,0,0,0,2,2,2,2,1,4,4,4,4,4,4,1,2,2,2,2,0,0,0,0,0,0},
+                        {1,1,1,1,1,1,2,1,1,2,1,1,1,4,4,1,1,1,2,1,1,2,1,1,1,1,1,1},
+                        {1,1,1,1,1,1,2,1,1,2,1,1,0,0,0,0,1,1,2,1,1,2,1,1,1,1,1,1},
+                        {0,0,0,0,0,0,2,2,2,2,1,0,0,0,0,0,0,1,2,2,2,2,0,0,0,0,0,0},
                         {1,1,1,1,1,1,2,1,1,2,1,1,1,1,1,1,1,1,2,1,1,2,1,1,1,1,1,1},
                         {1,1,1,1,1,1,2,1,1,2,1,1,1,1,1,1,1,1,2,1,1,2,1,1,1,1,1,1},
                         {1,1,1,1,1,1,2,1,1,2,2,2,2,2,2,2,2,2,2,1,1,2,1,1,1,1,1,1},
@@ -548,6 +579,7 @@ void mapa(int mod){
                         {1,2,1,1,1,1,1,1,1,1,1,1,2,1,1,2,1,1,1,1,1,1,1,1,1,1,2,1},
                         {1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1},
                         {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}};
+
 
                         for (i=0; i<31;i++)
                         {
