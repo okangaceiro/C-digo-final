@@ -132,6 +132,7 @@ void gamescreen(){
             screen_state = ENDGAME;
 		}
 		else if(vidas>0 && comendo>=250){
+	    comendo++;
             exit_screen = TRUE;
             screen_state = ENDGAME;
 		}
