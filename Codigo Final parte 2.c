@@ -57,7 +57,7 @@ int main() {
     LOCK_VARIABLE(exit_program);
     set_close_button_callback(fecha_programa);
 
-      screen_state = GAMESCREEN;
+      screen_state = MAINMENU;
 
 	//Variáveis Locais
 
