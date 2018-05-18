@@ -6,12 +6,12 @@ struct obj
 
 //funções
 void sair();
-void fantasma();
+void inimigos();
 void restart();
 void mapa(int);
 void control();
 void fecha_programa();
-enum{ MAINMENU, GAMESCREEN, TITLEHELP, TITLECREDITS, LOADING, ENDGAME};
+enum{ MAINMENU, GAMESCREEN, TITLEHELP, TITLECREDITS, LOADING, ENDGAME, EXITGAME};
 void mainmenu();
 void titlecredits();
 void titlehelp();
@@ -37,7 +37,7 @@ volatile int exit_program;
 int screen_state;
 
 SAMPLE *ponto, *morto, *comecou, *fase;
-BITMAP *buffer, *load1, *load2, *milho, *fundo, *itens, *fundo, *menu, *cursor, *newgame, *help, *credits, *menuhelp, *menucredits, *gameover, *gameover1, *win, *win1;
+BITMAP *buffer, *load1, *load2, *milho, *fundoload, *fundoendgame, *itens, *fundomapa, *menu, *cursor, *newgame, *help, *credits, *menuhelp, *menucredits, *gameover, *gameover1;
 FONT *f48;
 
 int main() {
@@ -75,6 +75,8 @@ int main() {
             titleload();
         else if(screen_state == ENDGAME)
             titlend();
+        else if(screen_state == EXITGAME)
+            exit_program = TRUE;
     }
     //Finalizacao
 	return 0;
@@ -89,7 +91,7 @@ void gamescreen(){
     int exit_screen = FALSE;
     //Variáveis Locais
 	buffer = create_bitmap(width, height);
-	fundo = load_bitmap("img/mapaQuaseCerto.bmp", NULL);
+	fundomapa = load_bitmap("img/mapaQuaseCerto.bmp", NULL);
 	itens = load_bitmap("img/Servao1.bmp", NULL);
 	f48 = load_font("font/dpcomic.pcx", NULL, NULL);
 	ponto = load_sample("som/comendo.wav");
@@ -113,13 +115,16 @@ void gamescreen(){
 	{
 	    antX = p.x;
 	    antY = p.y;
-	    draw_sprite(buffer, fundo, 5, 5);
+	    draw_sprite(buffer, fundomapa, 5, 5);
 		textprintf_ex(buffer, f48, 925, 250, 0xffffff, -1,"%i", comendo);
 		if(vida) control();
 		mapa(0);
+		if(vidas>0 && comendo>=285){
+            masked_blit(itens, buffer, 0, 0, 365, 290, 38,40);
+		}
 		if (vida || inicio) masked_blit(itens, buffer, p.wx, p.wy, p.x*28-8, p.y*21-7, p.w, p.h);
 		for (i = 0; i < vidas; i++) masked_blit(itens, buffer, 160, 0, 820 + i*45, 600, 42, 44);
-		fantasma();
+		inimigos();
 		draw_sprite(screen, buffer, 0, 0);
 		rest(100);
 		clear(buffer);
@@ -127,22 +132,25 @@ void gamescreen(){
 		//sons
 		if (som == 2) {stop_sample(ponto); play_sample(ponto, 255, 128, 1000, 0);}
 		som = 0;
-
-		if(vidas<=0){
+        if(vidas<=0){
             exit_screen = TRUE;
             screen_state = ENDGAME;
 		}
-		else if(vidas>0 && comendo>=285){
-            comendo++;
-            exit_screen = TRUE;
-            screen_state = ENDGAME;
-		}
+		 if(((antX==13 &&  antY==13)|| (antX==14 && antY==14) || (antX==15 && antY==15)|| (antX==16 && antY==16)) && comendo>=285){
+                comendo++;
+                p.x = 14;
+                p.y = 23;
+                vida = 0;
+                inicio = 0;
+                exit_screen = TRUE;
+                screen_state = ENDGAME;
+            }
 	}
 
 	//Finalização
 	destroy_font(f48);
 	destroy_bitmap(itens);
-	destroy_bitmap(fundo);
+	destroy_bitmap(fundomapa);
 	destroy_bitmap(buffer);
 	destroy_sample(ponto);
 	destroy_sample(comecou);
@@ -196,6 +204,12 @@ void mainmenu(){
                                 screen_state = TITLECREDITS;
                             }
                     }
+                if(mouse_x > 20 && mouse_x < 75 && mouse_y > 20 && mouse_y < 70){
+                    if(mouse_b == 1){
+                        exit_screen = TRUE;
+                        screen_state = EXITGAME;
+                    }
+                }
               draw_sprite(buffer, cursor, mouse_x-6, mouse_y);
               draw_sprite(screen, buffer, 0, 0);
 
@@ -284,30 +298,32 @@ void titlecredits(){
 void titlend(){
 
     int exit_screen = FALSE;
+    int i, contador=0;
 
     //BITMAPS
     buffer = create_bitmap(width, height);
+    itens = load_bitmap("img/Servao1.bmp", NULL);
+    fundoendgame = load_bitmap("img/fundofinal.bmp", NULL);
     gameover = load_bitmap("img/gameover0.bmp", NULL);
     gameover1 = load_bitmap("img/gameover1.bmp", NULL);
-    win = load_bitmap("img/winner.bmp", NULL);
-    win1 = load_bitmap("img/winner1.bmp", NULL);
     cursor = load_bitmap("img/cursor.bmp", NULL);
      while(!exit_program && !exit_screen){
 
             if(comendo>=285){
-                    draw_sprite(buffer, win, 0, 0);
 
-                    if(mouse_x > 335 && mouse_x < 717 && mouse_y > 286 && mouse_y < 357){
-                    draw_sprite(buffer, win1, 0, 0);
-
-                    if(mouse_b == 1)
-                        {
+                    for (i = 0; i < 5; i++){
+                        draw_sprite(buffer, fundoendgame, 0, 0);
+                        masked_blit(itens, buffer, i*60, 344, 425, 508, p.w, p.h);
+                        masked_blit(itens, buffer, i*60, 285, 450, 508, p.w, p.h);
+                        draw_sprite(screen, buffer, 0, 0);
+                        rest(200);
+                    }
+                    if(contador == 12){
                             vidas = 3;
                             comendo = 0;
                             exit_screen = TRUE;
                             screen_state = MAINMENU;
                         }
-                    }
             }
             else if(vidas<=0){
 
@@ -324,17 +340,18 @@ void titlend(){
                             screen_state = MAINMENU;
                         }
                  }
+                 draw_sprite(buffer, cursor, mouse_x-6, mouse_y);
               }
-              draw_sprite(buffer, cursor, mouse_x-6, mouse_y);
+              contador++;
               draw_sprite(screen, buffer, 0, 0);
               clear(buffer);
 
    }
 
+    destroy_bitmap(fundoendgame);
+    destroy_bitmap(itens);
     destroy_bitmap(gameover);
     destroy_bitmap(gameover1);
-    destroy_bitmap(win);
-    destroy_bitmap(win1);
     destroy_bitmap(cursor);
     destroy_bitmap(buffer);
 
@@ -346,7 +363,7 @@ void titleload(){
 
     //BITMAP
     buffer = create_bitmap(SCREEN_W, SCREEN_H);
-    fundo = load_bitmap("img/loadframes/fundo.bmp",NULL);
+    fundoload = load_bitmap("img/loadframes/fundo.bmp",NULL);
     load1 = load_bitmap("img/loadframes/load1.bmp", NULL);
     load2 = load_bitmap("img/loadframes/load2.bmp", NULL);
     milho = load_bitmap("img/loadframes/milho.bmp", NULL);
@@ -361,7 +378,7 @@ void titleload(){
                     screen_state = GAMESCREEN;
             }
             for (i = 0; i < 4; i++) {
-                            draw_sprite(buffer, fundo, 5 ,5);
+                            draw_sprite(buffer, fundoload, 5 ,5);
                             masked_blit(load1, buffer, i*50, 0, SCREEN_W/2, SCREEN_H/2, 44, 93);
                             masked_blit(milho,buffer, 0,0,(SCREEN_W/2)-58, (SCREEN_H/2)+90, 36 + (i*36),60);
                             draw_sprite(screen, buffer,0,0);
@@ -369,7 +386,7 @@ void titleload(){
                             clear(buffer);
             }
             for (j = 0; j < 5; j++){
-                            draw_sprite(buffer, fundo, 5 ,5);
+                            draw_sprite(buffer, fundoload, 5 ,5);
                             masked_blit(load2, buffer, j*100, 0, (SCREEN_W/2)-54, SCREEN_H/2, 100, 93);
                             draw_sprite(screen, buffer,0,0);
                             rest(200);
@@ -385,7 +402,7 @@ void titleload(){
 
   //finalizacao
   destroy_bitmap(buffer);
-  destroy_bitmap(fundo);
+  destroy_bitmap(fundoload);
   destroy_bitmap(load1);
   destroy_bitmap(load2);
   destroy_bitmap(milho);
@@ -396,7 +413,7 @@ void restart(){
     if (inicio)
     {
         vida = vidas;
-        rest(5000);
+        rest(10);
         inicio = 0;
         fase1 = 0;
     }
@@ -413,7 +430,7 @@ void restart(){
         stop_sample(fase);
         for (i = 0; i < 5; i++)
         {
-            draw_sprite(buffer, fundo, 5, 5);
+            draw_sprite(buffer, fundomapa, 5, 5);
             masked_blit(itens, buffer, 60 + i*60, 236, p.x*28-8, p.y*21-7, p.w, p.h);
             mapa(0);
             draw_sprite(screen, buffer, 0, 0);
@@ -430,7 +447,7 @@ void restart(){
         morre = 0;
     }
 }
-void fantasma(){
+void inimigos(){
     int i;
     for(i = 0; i<4 ; i++){
 
@@ -508,11 +525,10 @@ void fantasma(){
             else if(f[i].dir == 2 && map[f[i].y][f[i].x+1] != 1) f[i].x++; // dir
             else if(f[i].dir == 3 && map[f[i].y+1][f[i].x] != 1) f[i].y++; // baixo
 
-
-    masked_blit(itens, buffer, f[i].wx, f[i].wy, f[i].x*28 - 8, f[i].y * 21 - 7, f[i].w, f[i].h);
-
+    if(f[i].dir==0 || f[i].dir==1) masked_blit(itens, buffer, f[i].wx, f[i].wy, f[i].x*28 - 8, f[i].y * 21 - 7, f[i].w, f[i].h);
+    else if(f[i].dir==2 || f[i].dir==3) masked_blit(itens, buffer, f[i].wx+60, f[i].wy, f[i].x*28 - 8, f[i].y * 21 - 7, f[i].w, f[i].h);
     //colisão
-    if(vidas && (p.x == f[i].x && p.y == f[i].y || antX == f[i].x && antY == f[i].y))
+    if(vidas && (p.x == f[i].x && p.y == f[i].y) || (antX == f[i].x && antY == f[i].y))
     {
         morre = 1;
     }
@@ -598,4 +614,3 @@ void mapa(int mod){
 }
 void sair(){sai= 1;}
 END_OF_FUNCTION(sair);
-
