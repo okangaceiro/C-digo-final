@@ -95,7 +95,7 @@ void gamescreen(){
 	itens = load_bitmap("img/Servao1.bmp", NULL);
 	f48 = load_font("font/dpcomic.pcx", NULL, NULL);
 	ponto = load_sample("som/comendo.wav");
-	comecou = load_sample("som/comecou.mid");
+	comecou = load_sample("som/inicio.wav");
 	fase = load_sample("som/som.wav");
 	press = load_bitmap("img/press.bmp", NULL);
 
