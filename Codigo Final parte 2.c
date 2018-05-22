@@ -553,6 +553,8 @@ void inimigos(){
     if(vidas && (p.x == f[i].x && p.y == f[i].y) || (antX == f[i].x && antY == f[i].y))
     {
         morre = 1;
+	play_sample(morrendo, 255, 128, 1000, 0);
+        stop_sample(fase);
     }
     }
 
