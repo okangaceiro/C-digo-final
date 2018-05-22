@@ -468,6 +468,7 @@ void restart(){
         }
     }
 }
+
 void inimigos(){
     int i;
     for(i = 0; i<4 ; i++){
@@ -481,10 +482,10 @@ void inimigos(){
 
             //Sr. de Engenho = perseguidor
 
-            else if(i==2 && f[2].x < p.x && f[2].dir != 0 && map[f[2].y][f[2].x+1] != 1) f[2].dir = 2;
-            else if(i==2 && f[2].x > p.x && f[2].dir != 2 && map[f[2].y][f[2].x-1] != 1) f[2].dir = 0;
-            else if(i==2 && f[2].y < p.y && f[2].dir != 1 && map[f[2].y+1][f[2].x] != 1) f[2].dir = 3;
-            else if(i==2 && f[2].y > p.y && f[2].dir != 3 && map[f[2].y-1][f[2].x] != 1) f[2].dir = 1;
+            else if(i==2 && f[2].x < p.x-1 && f[2].dir != 0 && map[f[2].y][f[2].x+1] != 1) f[2].dir = 2;
+            else if(i==2 && f[2].x > p.x-1 && f[2].dir != 2 && map[f[2].y][f[2].x-1] != 1) f[2].dir = 0;
+            else if(i==2 && f[2].y < p.y-1 && f[2].dir != 1 && map[f[2].y+1][f[2].x] != 1) f[2].dir = 3;
+            else if(i==2 && f[2].y > p.y-1 && f[2].dir != 3 && map[f[2].y-1][f[2].x] != 1) f[2].dir = 1;
 
             //Lobisomem = fica um pouco longe do Kangaceiro
             else if(i==3 && f[3].x < p.x+16 && f[3].dir != 0 && map[f[3].y][f[3].x+1] != 1) f[3].dir = 2;
@@ -552,13 +553,11 @@ void inimigos(){
     if(vidas && (p.x == f[i].x && p.y == f[i].y) || (antX == f[i].x && antY == f[i].y))
     {
         morre = 1;
-
-        play_sample(morrendo, 255, 128, 1000, 0);
-        stop_sample(fase);
     }
     }
 
 }
+
 void control(){
     if (key[KEY_LEFT] && map [p.y][p.x-1] != 1) p.dir=0;
     if (key[KEY_UP] && map [p.y-1][p.x] != 1) p.dir=1;
