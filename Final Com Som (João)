@@ -456,11 +456,17 @@ void restart(){
     }
     if (inicio || morre)
     {
+        int i;
         if (!morre) mapa(1);
         p.x = 14;
         p.y = 23;
         p.dir = 4;
         morre = 0;
+        for(i = 0; i< 4; i++)
+        {
+        f[i].x = 12 + i;
+        f[i].y = 14;
+        }
     }
 }
 void inimigos(){
