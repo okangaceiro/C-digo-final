@@ -100,6 +100,7 @@ void gamescreen(){
 	press = load_bitmap("img/press.bmp", NULL);
 
 	int i;
+	int start=0;
 	for (i = 0; i< 4; i++)
     {
         f[i].wx = 0;
@@ -119,7 +120,7 @@ void gamescreen(){
 	    antY = p.y;
 	    draw_sprite(buffer, fundo, 5, 5);
 		textprintf_ex(buffer, f48, 925, 250, 0xffffff, -1,"%i", comendo);
-		if(!vida && press_space>=7)
+		if(!start && press_space>=7)
         {
             draw_sprite(buffer, press, 0, 0);
             if(press_space == 14) press_space=0;
@@ -141,9 +142,10 @@ void gamescreen(){
                 f[i].y = 14;
                 f[i].dir = 1;
             }
+            start = 1;
         }
 		for (i = 0; i < vidas; i++) masked_blit(itens, buffer, 160, 0, 820 + i*45, 600, 42, 44);
-		inimigos();
+        if (start) inimigos();
 		draw_sprite(screen, buffer, 0, 0);
 		rest(100);
 		clear(buffer);
