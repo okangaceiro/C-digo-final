@@ -38,7 +38,7 @@ int screen_state;
 
 SAMPLE *ponto, *morto, *comecou, *fase, *morrendo, *musica;
 MIDI *song;
-BITMAP *buffer,*press , *load1, *load2, *milho, *fundoload, *fundoendgame, *itens, *fundomapa, *menu, *cursor, *newgame, *help, *credits, *menuhelp, *menucredits, *gameover, *gameover1;
+BITMAP *buffer, *load1, *load2, *milho, *fundoload, *fundoendgame, *itens, *fundomapa, *menu, *cursor, *newgame, *help, *credits, *menuhelp, *menucredits, *gameover, *gameover1;
 FONT *f48;
 
 int main() {
@@ -92,8 +92,6 @@ END_OF_FUNCTION(fecha_programa)
 void gamescreen(){
 
     int exit_screen = FALSE;
-    int press_space = 0;
-
     //Variáveis Locais
 	buffer = create_bitmap(width, height);
 	fundomapa = load_bitmap("img/mapa.bmp", NULL);
@@ -104,7 +102,6 @@ void gamescreen(){
 	fase = load_sample("som/som.wav");
 	song = load_midi("som/AllStar.mid");
 	morrendo = load_sample("som/morre.wav");
-	press = load_bitmap("img/press.bmp", NULL);
 
 	int i;
 	for (i = 0; i< 4; i++)
@@ -126,12 +123,6 @@ void gamescreen(){
 	    antY = p.y;
 	    draw_sprite(buffer, fundomapa, 5, 5);
 		textprintf_ex(buffer, f48, 925, 250, 0xffffff, -1,"%i", comendo);
-		if(!vida && press_space>=7)
-        {
-            draw_sprite(buffer, press, 0, 0);
-            if(press_space == 14) press_space=0;
-        }
-        press_space ++;
 		if(vida) control();
 		mapa(0);
 		if(vidas>0 && comendo>=285){
@@ -172,7 +163,6 @@ void gamescreen(){
 	destroy_sample(comecou);
 	destroy_sample(fase);
 	destroy_sample(morrendo);
-	destroy_bitmap(press);
 }
 
 void mainmenu(){
@@ -478,7 +468,6 @@ void restart(){
         }
     }
 }
-
 void inimigos(){
     int i;
     for(i = 0; i<4 ; i++){
@@ -492,10 +481,10 @@ void inimigos(){
 
             //Sr. de Engenho = perseguidor
 
-            else if(i==2 && f[2].x < p.x-1 && f[2].dir != 0 && map[f[2].y][f[2].x+1] != 1) f[2].dir = 2;
-            else if(i==2 && f[2].x > p.x-1 && f[2].dir != 2 && map[f[2].y][f[2].x-1] != 1) f[2].dir = 0;
-            else if(i==2 && f[2].y < p.y-1 && f[2].dir != 1 && map[f[2].y+1][f[2].x] != 1) f[2].dir = 3;
-            else if(i==2 && f[2].y > p.y-1 && f[2].dir != 3 && map[f[2].y-1][f[2].x] != 1) f[2].dir = 1;
+            else if(i==2 && f[2].x < p.x && f[2].dir != 0 && map[f[2].y][f[2].x+1] != 1) f[2].dir = 2;
+            else if(i==2 && f[2].x > p.x && f[2].dir != 2 && map[f[2].y][f[2].x-1] != 1) f[2].dir = 0;
+            else if(i==2 && f[2].y < p.y && f[2].dir != 1 && map[f[2].y+1][f[2].x] != 1) f[2].dir = 3;
+            else if(i==2 && f[2].y > p.y && f[2].dir != 3 && map[f[2].y-1][f[2].x] != 1) f[2].dir = 1;
 
             //Lobisomem = fica um pouco longe do Kangaceiro
             else if(i==3 && f[3].x < p.x+16 && f[3].dir != 0 && map[f[3].y][f[3].x+1] != 1) f[3].dir = 2;
@@ -563,13 +552,13 @@ void inimigos(){
     if(vidas && (p.x == f[i].x && p.y == f[i].y) || (antX == f[i].x && antY == f[i].y))
     {
         morre = 1;
-	play_sample(morrendo, 255, 128, 1000, 0);
+
+        play_sample(morrendo, 255, 128, 1000, 0);
         stop_sample(fase);
     }
     }
 
 }
-
 void control(){
     if (key[KEY_LEFT] && map [p.y][p.x-1] != 1) p.dir=0;
     if (key[KEY_UP] && map [p.y-1][p.x] != 1) p.dir=1;
@@ -649,4 +638,3 @@ void mapa(int mod){
 }
 void sair(){sai= 1;}
 END_OF_FUNCTION(sair);
-
