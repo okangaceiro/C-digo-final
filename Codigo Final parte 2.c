@@ -37,6 +37,7 @@ volatile int exit_program;
 int screen_state;
 
 SAMPLE *ponto, *morto, *comecou, *fase;
+MIDI *song;
 BITMAP *buffer, *load1, *load2, *milho, *fundoload, *fundoendgame, *itens, *fundomapa, *menu, *cursor, *newgame, *help, *credits, *menuhelp, *menucredits, *gameover, *gameover1;
 FONT *f48;
 
@@ -58,15 +59,16 @@ int main() {
     set_close_button_callback(fecha_programa);
 
       screen_state = MAINMENU;
-
+    song = load_midi("som/AllStar.mid");
 	//Variáveis Locais
-
+    play_midi(song,TRUE);
 	while (!exit_program)
 	{
 	    if(screen_state == MAINMENU)
             mainmenu();
-        else if(screen_state == GAMESCREEN)
+        else if(screen_state == GAMESCREEN){
             gamescreen();
+        }
         else if(screen_state == TITLEHELP)
             titlehelp();
         else if(screen_state == TITLECREDITS)
@@ -78,6 +80,7 @@ int main() {
         else if(screen_state == EXITGAME)
             exit_program = TRUE;
     }
+    destroy_midi(song);
     //Finalizacao
 	return 0;
 }
@@ -91,12 +94,13 @@ void gamescreen(){
     int exit_screen = FALSE;
     //Variáveis Locais
 	buffer = create_bitmap(width, height);
-	fundomapa = load_bitmap("img/mapaQuaseCerto.bmp", NULL);
-	itens = load_bitmap("img/Servao1.bmp", NULL);
+	fundomapa = load_bitmap("img/mapa.bmp", NULL);
+	itens = load_bitmap("img/personagens.bmp", NULL);
 	f48 = load_font("font/dpcomic.pcx", NULL, NULL);
 	ponto = load_sample("som/comendo.wav");
 	comecou = load_sample("som/comecou.mid");
 	fase = load_sample("som/som.wav");
+	song = load_midi("som/AllStar.mid");
 	int i;
 	for (i = 0; i< 4; i++)
     {
@@ -133,6 +137,7 @@ void gamescreen(){
 		if (som == 2) {stop_sample(ponto); play_sample(ponto, 255, 128, 1000, 0);}
 		som = 0;
         if(vidas<=0){
+            play_midi(song,TRUE);
             exit_screen = TRUE;
             screen_state = ENDGAME;
 		}
@@ -168,6 +173,8 @@ void mainmenu(){
 	newgame = load_bitmap("img/telas/newgame.bmp", NULL);
     help = load_bitmap("img/telas/help.bmp", NULL);
     credits = load_bitmap("img/telas/credits.bmp", NULL);
+
+
 
 	//Game Loop
 	while(!exit_program && !exit_screen)
@@ -302,7 +309,7 @@ void titlend(){
 
     //BITMAPS
     buffer = create_bitmap(width, height);
-    itens = load_bitmap("img/Servao1.bmp", NULL);
+    itens = load_bitmap("img/personagens.bmp", NULL);
     fundoendgame = load_bitmap("img/fundofinal.bmp", NULL);
     gameover = load_bitmap("img/gameover0.bmp", NULL);
     gameover1 = load_bitmap("img/gameover1.bmp", NULL);
@@ -419,6 +426,7 @@ void restart(){
     }
     if(key[KEY_SPACE] && !vida)
     {
+        stop_midi();
         while(key[KEY_SPACE]); inicio = 1;
     }
     if (morre && vida)
@@ -460,22 +468,22 @@ void inimigos(){
 
             //Sr. de Engenho = perseguidor
 
-            else if(i==3 && f[3].x < p.x && f[3].dir != 0 && map[f[3].y][f[3].x+1] != 1) f[3].dir = 2;
-            else if(i==3 && f[3].x > p.x && f[3].dir != 2 && map[f[3].y][f[3].x-1] != 1) f[3].dir = 0;
-            else if(i==3 && f[3].y < p.y && f[3].dir != 1 && map[f[3].y+1][f[3].x] != 1) f[3].dir = 3;
-            else if(i==3 && f[3].y > p.y && f[3].dir != 3 && map[f[3].y-1][f[3].x] != 1) f[3].dir = 1;
+            else if(i==2 && f[2].x < p.x && f[2].dir != 0 && map[f[2].y][f[2].x+1] != 1) f[2].dir = 2;
+            else if(i==2 && f[2].x > p.x && f[2].dir != 2 && map[f[2].y][f[2].x-1] != 1) f[2].dir = 0;
+            else if(i==2 && f[2].y < p.y && f[2].dir != 1 && map[f[2].y+1][f[2].x] != 1) f[2].dir = 3;
+            else if(i==2 && f[2].y > p.y && f[2].dir != 3 && map[f[2].y-1][f[2].x] != 1) f[2].dir = 1;
 
-            //Curupira = fica um pouco longe do Kangaceiro
-            else if(i==2 && f[2].x < p.x+16 && f[2].dir != 0 && map[f[2].y][f[2].x+1] != 1) f[2].dir = 2;
-            else if(i==2 && f[2].x > p.x+16 && f[2].dir != 2 && map[f[2].y][f[2].x-1] != 1) f[2].dir = 0;
-            else if(i==2 && f[2].y < p.y+16 && f[2].dir != 1 && map[f[2].y+1][f[2].x] != 1) f[2].dir = 3;
-            else if(i==2 && f[2].y < p.y+16 && f[2].dir != 3 && map[f[2].y-1][f[2].x] != 1) f[2].dir = 1;
+            //Lobisomem = fica um pouco longe do Kangaceiro
+            else if(i==3 && f[3].x < p.x+16 && f[3].dir != 0 && map[f[3].y][f[3].x+1] != 1) f[3].dir = 2;
+            else if(i==3 && f[3].x > p.x+16 && f[3].dir != 2 && map[f[3].y][f[3].x-1] != 1) f[3].dir = 0;
+            else if(i==3 && f[3].y < p.y+16 && f[3].dir != 1 && map[f[3].y+1][f[3].x] != 1) f[3].dir = 3;
+            else if(i==3 && f[3].y < p.y+16 && f[3].dir != 3 && map[f[3].y-1][f[3].x] != 1) f[3].dir = 1;
 
-            //Lobisomem = tenta imitar a posição do Kangaceiro
-            else if(i==1 && f[1].x < p.x-8 && f[1].dir != 0 && map[f[1].y][f[1].x+1] != 1) f[1].dir = 2;
-            else if(i==1 && f[1].x > p.x-8 && f[1].dir != 2 && map[f[1].y][f[1].x-1] != 1) f[1].dir = 0;
-            else if(i==1 && f[1].y < p.y-8 && f[1].dir != 1 && map[f[1].y+1][f[1].x] != 1) f[1].dir = 3;
-            else if(i==1 && f[1].y > p.y-8 && f[1].dir != 3 && map[f[1].y-1][f[1].x] != 1) f[1].dir = 1;
+            //Curupira = tenta imitar a posição do Kangaceiro
+            else if(i==0 && f[0].x < p.x-8 && f[0].dir != 0 && map[f[0].y][f[0].x+1] != 1) f[0].dir = 2;
+            else if(i==0 && f[0].x > p.x-8 && f[0].dir != 2 && map[f[0].y][f[0].x-1] != 1) f[0].dir = 0;
+            else if(i==0 && f[0].y < p.y-8 && f[0].dir != 1 && map[f[0].y+1][f[0].x] != 1) f[0].dir = 3;
+            else if(i==0 && f[0].y > p.y-8 && f[0].dir != 3 && map[f[0].y-1][f[0].x] != 1) f[0].dir = 1;
             else
             {
 
@@ -614,3 +622,4 @@ void mapa(int mod){
 }
 void sair(){sai= 1;}
 END_OF_FUNCTION(sair);
+
