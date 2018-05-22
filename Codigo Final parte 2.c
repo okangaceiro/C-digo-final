@@ -36,7 +36,7 @@ int comendo = 0;
 volatile int exit_program;
 int screen_state;
 
-SAMPLE *ponto, *morto, *comecou, *fase;
+SAMPLE *ponto, *morto, *comecou, *fase, *morrendo, *musica;
 MIDI *song;
 BITMAP *buffer, *load1, *load2, *milho, *fundoload, *fundoendgame, *itens, *fundomapa, *menu, *cursor, *newgame, *help, *credits, *menuhelp, *menucredits, *gameover, *gameover1;
 FONT *f48;
@@ -97,10 +97,12 @@ void gamescreen(){
 	fundomapa = load_bitmap("img/mapa.bmp", NULL);
 	itens = load_bitmap("img/personagens.bmp", NULL);
 	f48 = load_font("font/dpcomic.pcx", NULL, NULL);
+	comecou = load_sample("som/inicio.wav");
 	ponto = load_sample("som/comendo.wav");
-	comecou = load_sample("som/comecou.mid");
 	fase = load_sample("som/som.wav");
 	song = load_midi("som/AllStar.mid");
+	morrendo = load_sample("som/morre.wav");
+
 	int i;
 	for (i = 0; i< 4; i++)
     {
@@ -160,6 +162,7 @@ void gamescreen(){
 	destroy_sample(ponto);
 	destroy_sample(comecou);
 	destroy_sample(fase);
+	destroy_sample(morrendo);
 }
 
 void mainmenu(){
@@ -420,7 +423,10 @@ void restart(){
     if (inicio)
     {
         vida = vidas;
-        rest(10);
+        play_sample(comecou, 255, 128, 1000, 0);
+        rest(4000);
+        stop_sample(comecou);
+        play_sample(fase, 255, 128, 1000, 1);
         inicio = 0;
         fase1 = 0;
     }
@@ -431,7 +437,7 @@ void restart(){
     }
     if (morre && vida)
     {
-        int i;
+         int i;
         vida--;
         vidas--;
         rest(500);
@@ -445,14 +451,21 @@ void restart(){
             rest(200);
             clear(buffer);
         }
+        play_sample(fase, 255, 128, 1000, 1);
     }
     if (inicio || morre)
     {
+         int i;
         if (!morre) mapa(1);
         p.x = 14;
         p.y = 23;
         p.dir = 4;
         morre = 0;
+        for(i = 0; i< 4; i++)
+        {
+        f[i].x = 12 + i;
+        f[i].y = 14;
+        }
     }
 }
 void inimigos(){
@@ -539,6 +552,9 @@ void inimigos(){
     if(vidas && (p.x == f[i].x && p.y == f[i].y) || (antX == f[i].x && antY == f[i].y))
     {
         morre = 1;
+
+        play_sample(morrendo, 255, 128, 1000, 0);
+        stop_sample(fase);
     }
     }
 
@@ -622,4 +638,3 @@ void mapa(int mod){
 }
 void sair(){sai= 1;}
 END_OF_FUNCTION(sair);
-
