@@ -38,7 +38,7 @@ int screen_state;
 
 SAMPLE *ponto, *morto, *comecou, *fase, *morrendo, *musica;
 MIDI *song;
-BITMAP *buffer, *load1, *load2, *milho, *fundoload, *fundoendgame, *itens, *fundomapa, *menu, *cursor, *newgame, *help, *credits, *menuhelp, *menucredits, *gameover, *gameover1;
+BITMAP *buffer,*press, *load1, *load2, *milho, *fundoload, *fundoendgame, *itens, *fundomapa, *menu, *cursor, *newgame, *help, *credits, *menuhelp, *menucredits, *gameover, *gameover1;
 FONT *f48;
 
 int main() {
@@ -92,6 +92,7 @@ END_OF_FUNCTION(fecha_programa)
 void gamescreen(){
 
     int exit_screen = FALSE;
+    int press_space = 0;
     //Variáveis Locais
 	buffer = create_bitmap(width, height);
 	fundomapa = load_bitmap("img/mapa.bmp", NULL);
@@ -102,6 +103,7 @@ void gamescreen(){
 	fase = load_sample("som/som.wav");
 	song = load_midi("som/AllStar.mid");
 	morrendo = load_sample("som/morre.wav");
+	press = load_bitmap("img/press.bmp", NULL);
 
 	int i;
 	for (i = 0; i< 4; i++)
@@ -129,8 +131,24 @@ void gamescreen(){
             masked_blit(itens, buffer, 0, 0, 365, 290, 38,40);
 		}
 		if (vida || inicio) masked_blit(itens, buffer, p.wx, p.wy, p.x*28-8, p.y*21-7, p.w, p.h);
+		// Quando inicia, coloca os monstros no local de inicio.
+		if(inicio)
+        {
+            for (i = 0; i< 4; i++)
+            {
+                f[i].x = 12 + i;
+                f[i].y = 14;
+                f[i].dir = 1;
+            }
+        }
 		for (i = 0; i < vidas; i++) masked_blit(itens, buffer, 160, 0, 820 + i*45, 600, 42, 44);
 		inimigos();
+		if(!vida && press_space>=7)
+        {
+            draw_sprite(buffer, press, 0, 0);
+            if(press_space == 14) press_space=0;
+        }
+        press_space ++;
 		draw_sprite(screen, buffer, 0, 0);
 		rest(100);
 		clear(buffer);
@@ -420,6 +438,7 @@ void titleload(){
 
 void restart(){
     if (morre || !vida) stop_sample(fase);
+
     if (inicio)
     {
         vida = vidas;
@@ -442,6 +461,7 @@ void restart(){
         vidas--;
         rest(500);
         stop_sample(fase);
+        play_sample(morrendo, 255, 128, 1000, 0);
         for (i = 0; i < 5; i++)
         {
             draw_sprite(buffer, fundomapa, 5, 5);
@@ -451,17 +471,18 @@ void restart(){
             rest(200);
             clear(buffer);
         }
+        stop_sample(morrendo);
         play_sample(fase, 255, 128, 1000, 1);
     }
     if (inicio || morre)
     {
-         int i;
+        int i;
         if (!morre) mapa(1);
         p.x = 14;
         p.y = 23;
         p.dir = 4;
         morre = 0;
-        for(i = 0; i< 4; i++)
+        for(i = 0; i< 4 && key[KEY_SPACE]; i++)
         {
         f[i].x = 12 + i;
         f[i].y = 14;
@@ -481,10 +502,10 @@ void inimigos(){
 
             //Sr. de Engenho = perseguidor
 
-            else if(i==2 && f[2].x < p.x && f[2].dir != 0 && map[f[2].y][f[2].x+1] != 1) f[2].dir = 2;
-            else if(i==2 && f[2].x > p.x && f[2].dir != 2 && map[f[2].y][f[2].x-1] != 1) f[2].dir = 0;
-            else if(i==2 && f[2].y < p.y && f[2].dir != 1 && map[f[2].y+1][f[2].x] != 1) f[2].dir = 3;
-            else if(i==2 && f[2].y > p.y && f[2].dir != 3 && map[f[2].y-1][f[2].x] != 1) f[2].dir = 1;
+            else if(i==2 && f[2].x < p.x-1 && f[2].dir != 0 && map[f[2].y][f[2].x+1] != 1) f[2].dir = 2;
+            else if(i==2 && f[2].x > p.x-1 && f[2].dir != 2 && map[f[2].y][f[2].x-1] != 1) f[2].dir = 0;
+            else if(i==2 && f[2].y < p.y-1 && f[2].dir != 1 && map[f[2].y+1][f[2].x] != 1) f[2].dir = 3;
+            else if(i==2 && f[2].y > p.y-1 && f[2].dir != 3 && map[f[2].y-1][f[2].x] != 1) f[2].dir = 1;
 
             //Lobisomem = fica um pouco longe do Kangaceiro
             else if(i==3 && f[3].x < p.x+16 && f[3].dir != 0 && map[f[3].y][f[3].x+1] != 1) f[3].dir = 2;
@@ -549,12 +570,10 @@ void inimigos(){
     if(f[i].dir==0 || f[i].dir==1) masked_blit(itens, buffer, f[i].wx, f[i].wy, f[i].x*28 - 8, f[i].y * 21 - 7, f[i].w, f[i].h);
     else if(f[i].dir==2 || f[i].dir==3) masked_blit(itens, buffer, f[i].wx+60, f[i].wy, f[i].x*28 - 8, f[i].y * 21 - 7, f[i].w, f[i].h);
     //colisão
-    if(vidas && (p.x == f[i].x && p.y == f[i].y) || (antX == f[i].x && antY == f[i].y))
+    if(vidas && (p.x == f[i].x && p.y == f[i].y || antX == f[i].x && antY == f[i].y))
     {
         morre = 1;
 
-        play_sample(morrendo, 255, 128, 1000, 0);
-        stop_sample(fase);
     }
     }
 
