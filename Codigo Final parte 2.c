@@ -101,7 +101,7 @@ void gamescreen(){
 	comecou = load_sample("som/inicio.wav");
 	ponto = load_sample("som/comendo.wav");
 	fase = load_sample("som/som.wav");
-	song = load_midi("som/AllStar.mid");
+	song = load_midi("som/ShootingStar.mid");
 	morrendo = load_sample("som/morre.wav");
 	press = load_bitmap("img/press.bmp", NULL);
 
